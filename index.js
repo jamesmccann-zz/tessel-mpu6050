@@ -34,24 +34,23 @@ var PWR_MGMT_1 = 0x6B,
 var ACCEL_RANGES = [2, 4, 8, 16],
     GYRO_RANGES = [250, 500, 1000, 2000];
 
-// LSB/degrees per second
-var gyro_xsensitivity,
-    gyro_ysensitivity,
-    gyro_zsensitivity;
-
-// LSB/g
-var accel_sensitivity;
-
 function Mpu6050(port, i2cAddress) {
   this.i2cAddress = i2cAddress;
   this.i2c = new port.I2C(i2cAddress);
   this.queue = new Queue();
+
+  this.gyro_xoffset = 0;
+  this.gyro_yoffset = 0;
+  this.gyro_zoffset = 0;
+
   this.init();
 }
 
 util.inherits(Mpu6050, EventEmitter);
 
 Mpu6050.prototype.init = function() {
+  var self = this;
+
   // Disable sleep mode
   this.setSleepModeEnabled(false);
 
@@ -67,7 +66,9 @@ Mpu6050.prototype.init = function() {
 
   // Disable accelerometer self test
   // Set the accelerometer full scale range to +- 2g
-  this.setAccelerometerRange(2);
+  this.setAccelerometerRange(2, function() {
+    self.emit('ready');
+  });
 };
 
 Mpu6050.prototype._readRegisters = function (addressToRead, bytesToRead, callback) {
@@ -92,38 +93,11 @@ Mpu6050.prototype._writeRegister = function (addressToWrite, dataToWrite, callba
   });
 };
 
-Mpu6050.prototype.setSleepModeEnabled = function(enabled) {
-  this._writeRegister(PWR_MGMT_1, enabled | 0);
-};
-
-Mpu6050.prototype.setAccelerometerRange = function(range) {
-  var idx = ACCEL_RANGES.indexOf(range);
-  if (idx > -1) {
-    this._writeRegister(ACCEL_CONFIG, idx.toString(16));
-    accel_sensitivity = 32768 / range;
-  } else {
-    throw new Error(range + " is not a valid accelerometer range option. " +
-                    "Try one of " + ACCEL_RANGES.toString());
-  }
-};
-
-Mpu6050.prototype.setGyroscopeRange = function(range) {
-  var idx = GYRO_RANGES.indexOf(range);
-  if (idx > -1) {
-    this._writeRegister(GYRO_CONFIG, idx.toString(16));
-    gyro_xsensitivity = gyro_ysensitivity = gyro_zsensitivity = Math.ceil((131 / Math.pow(2, idx) * 10)) / 10;
-  } else {
-   throw new Error(range + " is not a valid gyro range option. " +
-                    "Try one of " + GYRO_RANGES.toString());
-
-  }
-};
-
 Mpu6050.prototype.readAccelerometerData = function(callback) {
   this._readRegisters(ACCEL_XOUT_H, 6, function(err, rx) {
-    var ax = rx.readInt16BE(0) / accel_sensitivity;
-    var ay = rx.readInt16BE(2) / accel_sensitivity;
-    var az = rx.readInt16BE(4) / accel_sensitivity;
+    var ax = rx.readInt16BE(0) / this.accel_sensitivity;
+    var ay = rx.readInt16BE(2) / this.accel_sensitivity;
+    var az = rx.readInt16BE(4) / this.accel_sensitivity;
 
     if (callback) {
       callback(ax, ay, az);
@@ -143,9 +117,9 @@ Mpu6050.prototype.readTempData = function(callback) {
 
 Mpu6050.prototype.readGyroData = function(callback) {
   this._readRegisters(GYRO_XOUT_H, 6, function(err, rx) {
-    var gx = rx.readInt16BE(0) / gyro_xsensitivity; // - gyroOffsetX,
-    var gy = rx.readInt16BE(2) / gyro_ysensitivity; // - gyroOffsetY,
-    var gz = rx.readInt16BE(4) / gyro_zsensitivity; // - gyroOffsetZ;
+    var gx = rx.readInt16BE(0) / this.gyro_xsensitivity; // - gyroOffsetX,
+    var gy = rx.readInt16BE(2) / this.gyro_ysensitivity; // - gyroOffsetY,
+    var gz = rx.readInt16BE(4) / this.gyro_zsensitivity; // - gyroOffsetZ;
 
     if (callback) {
       callback(gx, gy, gz);
@@ -155,12 +129,12 @@ Mpu6050.prototype.readGyroData = function(callback) {
 
 Mpu6050.prototype.readMotionData = function(callback) {
   this._readRegisters(ACCEL_XOUT_H, 14, function(err, rx) {
-    var ax = rx.readInt16BE(0) / accel_sensitivity;
-    var ay = rx.readInt16BE(2) / accel_sensitivity;
-    var az = rx.readInt16BE(4) / accel_sensitivity;
-    var gx = rx.readInt16BE(8) / gyro_xsensitivity; // - gyroOffsetX,
-    var gy = rx.readInt16BE(10) / gyro_ysensitivity; // - gyroOffsetY,
-    var gz = rx.readInt16BE(12) / gyro_zsensitivity; // - gyroOffsetZ;
+    var ax = rx.readInt16BE(0) / this.accel_sensitivity;
+    var ay = rx.readInt16BE(2) / this.accel_sensitivity;
+    var az = rx.readInt16BE(4) / this.accel_sensitivity;
+    var gx = rx.readInt16BE(8) / this.gyro_xsensitivity; // - gyroOffsetX,
+    var gy = rx.readInt16BE(10) / this.gyro_ysensitivity; // - gyroOffsetY,
+    var gz = rx.readInt16BE(12) / this.gyro_zsensitivity; // - gyroOffsetZ;
 
     if (callback) {
       callback(ax, ay, az, gx, gy, gz);
@@ -194,6 +168,39 @@ Mpu6050.prototype.readPitchAndRoll = (function() {
     }.bind(this));
   };
 }());
+
+Mpu6050.prototype.setSleepModeEnabled = function(enabled) {
+  this._writeRegister(PWR_MGMT_1, enabled | 0);
+};
+
+Mpu6050.prototype.setAccelerometerRange = function(range, callback) {
+  var idx = ACCEL_RANGES.indexOf(range);
+  if (idx > -1) {
+    this._writeRegister(ACCEL_CONFIG, idx.toString(16), callback);
+    this.accel_sensitivity = 32768 / range;
+  } else {
+    throw new Error(range + " is not a valid accelerometer range option. " +
+                    "Try one of " + ACCEL_RANGES.toString());
+  }
+};
+
+Mpu6050.prototype.setGyroscopeRange = function(range, callback) {
+  var idx = GYRO_RANGES.indexOf(range);
+  if (idx > -1) {
+    this._writeRegister(GYRO_CONFIG, idx.toString(16), callback);
+    this.gyro_xsensitivity = this.gyro_ysensitivity = this.gyro_zsensitivity = Math.ceil((131 / Math.pow(2, idx) * 10)) / 10;
+  } else {
+   throw new Error(range + " is not a valid gyro range option. " +
+                    "Try one of " + GYRO_RANGES.toString());
+
+  }
+};
+
+Mpu6050.prototype.setGyroOffsets = function(x, y, z) {
+  this.gyro_xoffset = x;
+  this.gyro_yoffset = y;
+  this.gyro_zoffset = z;
+};
 
 function use(port, address) {
   address = address || I2C_ADDR;
