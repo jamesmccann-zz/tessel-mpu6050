@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "https://github.com/jamesmccann/tessel-mpu6050"
+  "repository": "https://github.com/jamesmccann/tessel-mpu6050",
   "author": "James McCann <jmccnz@gmail.com>",
   "license": "MIT",
   "dependencies": {
