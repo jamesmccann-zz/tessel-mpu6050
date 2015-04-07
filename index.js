@@ -94,10 +94,11 @@ Mpu6050.prototype._writeRegister = function (addressToWrite, dataToWrite, callba
 };
 
 Mpu6050.prototype.readAccelerometerData = function(callback) {
+  var self = this;
   this._readRegisters(ACCEL_XOUT_H, 6, function(err, rx) {
-    var ax = rx.readInt16BE(0) / this.accel_sensitivity;
-    var ay = rx.readInt16BE(2) / this.accel_sensitivity;
-    var az = rx.readInt16BE(4) / this.accel_sensitivity;
+    var ax = rx.readInt16BE(0) / self.accel_sensitivity;
+    var ay = rx.readInt16BE(2) / self.accel_sensitivity;
+    var az = rx.readInt16BE(4) / self.accel_sensitivity;
 
     if (callback) {
       callback(ax, ay, az);
@@ -116,10 +117,12 @@ Mpu6050.prototype.readTempData = function(callback) {
 };
 
 Mpu6050.prototype.readGyroData = function(callback) {
+  var self = this;
+
   this._readRegisters(GYRO_XOUT_H, 6, function(err, rx) {
-    var gx = rx.readInt16BE(0) / this.gyro_xsensitivity; // - gyroOffsetX,
-    var gy = rx.readInt16BE(2) / this.gyro_ysensitivity; // - gyroOffsetY,
-    var gz = rx.readInt16BE(4) / this.gyro_zsensitivity; // - gyroOffsetZ;
+    var gx = (rx.readInt16BE(0) - self.gyro_xoffset) / self.gyro_xsensitivity;
+    var gy = (rx.readInt16BE(2) - self.gyro_yoffset) / self.gyro_ysensitivity;
+    var gz = (rx.readInt16BE(4) - self.gyro_zoffset) / self.gyro_zsensitivity;
 
     if (callback) {
       callback(gx, gy, gz);
@@ -128,13 +131,14 @@ Mpu6050.prototype.readGyroData = function(callback) {
 };
 
 Mpu6050.prototype.readMotionData = function(callback) {
+  var self = this;
   this._readRegisters(ACCEL_XOUT_H, 14, function(err, rx) {
-    var ax = rx.readInt16BE(0) / this.accel_sensitivity;
-    var ay = rx.readInt16BE(2) / this.accel_sensitivity;
-    var az = rx.readInt16BE(4) / this.accel_sensitivity;
-    var gx = rx.readInt16BE(8) / this.gyro_xsensitivity; // - gyroOffsetX,
-    var gy = rx.readInt16BE(10) / this.gyro_ysensitivity; // - gyroOffsetY,
-    var gz = rx.readInt16BE(12) / this.gyro_zsensitivity; // - gyroOffsetZ;
+    var ax = rx.readInt16BE(0) / self.accel_sensitivity;
+    var ay = rx.readInt16BE(2) / self.accel_sensitivity;
+    var az = rx.readInt16BE(4) / self.accel_sensitivity;
+    var gx = (rx.readInt16BE(8) - self.gyro_xoffset) / self.gyro_xsensitivity;
+    var gy = (rx.readInt16BE(10) - self.gyro_yoffset) / self.gyro_ysensitivity;
+    var gz = (rx.readInt16BE(12) - self.gyro_zoffset) / self.gyro_zsensitivity;
 
     if (callback) {
       callback(ax, ay, az, gx, gy, gz);
