@@ -21,6 +21,9 @@ var PWR_MGMT_1 = 0x6B,
     ACCEL_ZOUT_H = 0x3F,
     ACCEL_ZOUT_L = 0x40,
 
+    TEMP_OUT_H = 0x41,
+    TEMP_OUT_L = 0x42,
+
     GYRO_XOUT_H = 0x43,
     GYRO_XOUT_L = 0x44,
     GYRO_YOUT_H = 0x45,
@@ -124,6 +127,16 @@ Mpu6050.prototype.readAccelerometerData = function(callback) {
 
     if (callback) {
       callback(ax, ay, az);
+    }
+  });
+};
+
+Mpu6050.prototype.readTempData = function(callback) {
+  this._readRegisters(TEMP_OUT_H, 2, function(err, rx) {
+    var temp = rx.readInt16BE(0) / 340 + 36.53;
+
+    if (callback) {
+      callback(temp);
     }
   });
 };
