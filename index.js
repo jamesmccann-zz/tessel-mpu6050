@@ -26,20 +26,17 @@ var PWR_MGMT_1 = 0x6B,
     GYRO_YOUT_H = 0x45,
     GYRO_YOUT_L = 0x46,
     GYRO_ZOUT_H = 0x47,
-    GYRO_ZOUT_L = 0x48,
-
-    READ = 0x01,
-    WRITE = 0x00;
+    GYRO_ZOUT_L = 0x48;
 
 var ACCEL_RANGES = [2, 4, 8, 16],
-    GYRO_RANGES = [250, 500, 1000, 2000],
-    GYRO_SENSITIVITES = [131, 65.5, 32.8, 16.4];
+    GYRO_RANGES = [250, 500, 1000, 2000];
 
-// LSB/degrees per second - see data sheet
-var gyro_xsensitivity = 131,
-    gyro_ysensitivity = 131,
-    gyro_zsensitivity = 131;
+// LSB/degrees per second
+var gyro_xsensitivity,
+    gyro_ysensitivity,
+    gyro_zsensitivity;
 
+// LSB/g
 var accel_sensitivity;
 
 function Mpu6050(port, i2cAddress) {
@@ -51,10 +48,9 @@ function Mpu6050(port, i2cAddress) {
 
 util.inherits(Mpu6050, EventEmitter);
 
-//TODO: remove this or use as defaults
 Mpu6050.prototype.init = function() {
   // Disable sleep mode
-  this._writeRegister(PWR_MGMT_1, 0);
+  this.setSleepModeEnabled(false);
 
   // Set sample rate to 1000kHz
   this._writeRegister(SMPLRT_DIV, 0x07);
@@ -69,7 +65,7 @@ Mpu6050.prototype.init = function() {
   // Disable accelerometer self test
   // Set the accelerometer full scale range to +- 2g
   this.setAccelerometerRange(2);
-}
+};
 
 Mpu6050.prototype._readRegisters = function (addressToRead, bytesToRead, callback) {
   var self = this;
@@ -93,6 +89,10 @@ Mpu6050.prototype._writeRegister = function (addressToWrite, dataToWrite, callba
   });
 };
 
+Mpu6050.prototype.setSleepModeEnabled = function(enabled) {
+  this._writeRegister(PWR_MGMT_1, enabled | 0);
+};
+
 Mpu6050.prototype.setAccelerometerRange = function(range) {
   var idx = ACCEL_RANGES.indexOf(range);
   if (idx > -1) {
@@ -107,8 +107,8 @@ Mpu6050.prototype.setAccelerometerRange = function(range) {
 Mpu6050.prototype.setGyroscopeRange = function(range) {
   var idx = GYRO_RANGES.indexOf(range);
   if (idx > -1) {
-    this._writeRegister(ACCEL_CONFIG, idx.toString(16));
-    gyro_xsensitivity = gyro_ysensitivity = gyro_zsensitivity = GYRO_SENSITIVITES[idx];
+    this._writeRegister(GYRO_CONFIG, idx.toString(16));
+    gyro_xsensitivity = gyro_ysensitivity = gyro_zsensitivity = Math.ceil((131 / Math.pow(2, idx) * 10)) / 10;
   } else {
    throw new Error(range + " is not a valid gyro range option. " +
                     "Try one of " + GYRO_RANGES.toString());
@@ -118,7 +118,6 @@ Mpu6050.prototype.setGyroscopeRange = function(range) {
 
 Mpu6050.prototype.readAccelerometerData = function(callback) {
   this._readRegisters(ACCEL_XOUT_H, 6, function(err, rx) {
-    console.log(this.accelerometerRange);
     var ax = rx.readInt16BE(0) / accel_sensitivity;
     var ay = rx.readInt16BE(2) / accel_sensitivity;
     var az = rx.readInt16BE(4) / accel_sensitivity;
@@ -160,14 +159,14 @@ Mpu6050.prototype.convertAccelerometerData = function(ax, ay, az) {
   var roll = 57.295 * Math.atan(ay / Math.sqrt(Math.pow(az, 2) + Math.pow(ax, 2)));
   var pitch = 57.295 * Math.atan(-1*ax / Math.sqrt(Math.pow(az, 2) + Math.pow(ay, 2)));
 
-  return { roll: roll, pitch: pitch }
+  return { roll: roll, pitch: pitch };
 };
 
-Mpu6050.prototype.readPitchAndRoll = function() {
+Mpu6050.prototype.readPitchAndRoll = (function() {
   var pitch = 0.0, roll = 0.0;
 
   return function(delayMs, callback) {
-    this.readMotionData(function(ax, ay, az, gx, gy, gz) {
+    this.readMotionData(function(ax, ay, az, gx, gy) {
       var accel = this.convertAccelerometerData(ax, ay, az);
 
       var gyroRoll = roll + gx * delayMs / 1000;
@@ -181,15 +180,23 @@ Mpu6050.prototype.readPitchAndRoll = function() {
       }
     }.bind(this));
   };
-}();
+}());
 
 function use(port, address) {
   address = address || I2C_ADDR;
   return new Mpu6050(port, address);
 }
 
-exports.I2C_ADDR_LOW = I2C_ADDR;
-exports.I2C_ADDR_HIGH = I2C_ADDR_H;
+exports.constants = {
+  I2C_ADDR: I2C_ADDR,
+  I2C_ADDR_HIGH: I2C_ADDR_H,
+  SMPLRT_DIV: SMPLRT_DIV,
+  CONFIG: CONFIG,
+  ACCEL_CONFIG: ACCEL_CONFIG,
+  GYRO_CONFIG: GYRO_CONFIG,
+  PWR_MGMT_1: PWR_MGMT_1
+};
+
 exports.Mpu6050 = Mpu6050;
 exports.use = use;
 
