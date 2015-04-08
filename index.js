@@ -188,7 +188,7 @@ Mpu6050.prototype.setAccelerometerRange = function(range, callback) {
   }
 };
 
-Mpu6050.prototype.setGyroscopeRange = function(range, callback) {
+Mpu6050.prototype.setGyroRange = function(range, callback) {
   var idx = GYRO_RANGES.indexOf(range);
   if (idx > -1) {
     this._writeRegister(GYRO_CONFIG, idx.toString(16), callback);

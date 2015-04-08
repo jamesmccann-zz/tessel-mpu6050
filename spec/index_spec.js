@@ -56,7 +56,7 @@ describe('readGyroData', function() {
       buf.writeInt16BE(-426, 4);
       callback(undefined, buf);
     });
-    mpu.setGyroscopeRange(250);
+    mpu.setGyroRange(250);
   });
 
   it('should return correct gyro readings', function() {
@@ -84,7 +84,7 @@ describe('readMotionData', function() {
       callback(undefined, buf);
     });
     mpu.setAccelerometerRange(2);
-    mpu.setGyroscopeRange(250);
+    mpu.setGyroRange(250);
   });
 
   it('should return correct gyro readings', function() {
@@ -137,6 +137,89 @@ describe('readPitchAndRoll', function() {
 
   // TODO: sort out test case for this
   xit('should return accurate pitch and roll angles', function() {
+  });
+});
+
+describe('setSleepModeEnabled', function() {
+  beforeEach(function() {
+    mpu = mpu6050.use(port_stub);
+    spyOn(mpu, '_writeRegister');
+  });
+
+  it('writes the register for PWR_MGMT_1', function() {
+    mpu.setSleepModeEnabled(false);
+    expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.PWR_MGMT_1, 0);
+
+    mpu.setSleepModeEnabled(true);
+    expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.PWR_MGMT_1, 1);
+  });
+});
+
+describe('setAccelerometerRange', function() {
+  beforeEach(function() {
+    mpu = mpu6050.use(port_stub);
+    spyOn(mpu, '_writeRegister');
+  });
+
+  describe('with valid range value', function() {
+    it('writes the register for ACCEL_CONFIG', function() {
+      mpu.setAccelerometerRange(2);
+      mpu.setAccelerometerRange(4);
+      mpu.setAccelerometerRange(8);
+      mpu.setAccelerometerRange(16);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.ACCEL_CONFIG, '0', undefined);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.ACCEL_CONFIG, '1', undefined);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.ACCEL_CONFIG, '2', undefined);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.ACCEL_CONFIG, '3', undefined);
+    });
+
+    it('sets accel_sensitivity', function() {
+      mpu.setAccelerometerRange(2);
+      expect(mpu.accel_sensitivity).toEqual(16384);
+
+      mpu.setAccelerometerRange(4);
+      expect(mpu.accel_sensitivity).toEqual(8192);
+
+      mpu.setAccelerometerRange(8);
+      expect(mpu.accel_sensitivity).toEqual(4096);
+
+      mpu.setAccelerometerRange(16);
+      expect(mpu.accel_sensitivity).toEqual(2048);
+    });
+  });
+});
+
+describe('setGyroRange', function() {
+  beforeEach(function() {
+    mpu = mpu6050.use(port_stub);
+    spyOn(mpu, '_writeRegister');
+  });
+
+  describe('with valid range value', function() {
+    it('writes the register for GYRO_CONFIG', function() {
+      mpu.setGyroRange(250);
+      mpu.setGyroRange(500);
+      mpu.setGyroRange(1000);
+      mpu.setGyroRange(2000);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.GYRO_CONFIG, '0', undefined);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.GYRO_CONFIG, '1', undefined);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.GYRO_CONFIG, '2', undefined);
+      expect(mpu._writeRegister).toHaveBeenCalledWith(mpu6050.constants.GYRO_CONFIG, '3', undefined);
+    });
+
+    it('sets gyro_sensitivity', function() {
+      mpu.setGyroRange(250);
+      expect(mpu.gyro_xsensitivity).toBeCloseTo(131, 1);
+
+      mpu.setGyroRange(500);
+      expect(mpu.gyro_xsensitivity).toEqual(65.5, 1);
+
+      mpu.setGyroRange(1000);
+      expect(mpu.gyro_xsensitivity).toEqual(32.8, 1);
+
+      mpu.setGyroRange(2000);
+      expect(mpu.gyro_xsensitivity).toEqual(16.4, 1);
+    });
   });
 });
 
