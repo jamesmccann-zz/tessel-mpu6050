@@ -4,9 +4,7 @@ A Tessel-compatible driver the InvenSense MPU-6050 IMU.
 
 ## Installation
 
-```sh
-npm install tessel-mpu6050
-```
+Work in progress
 
 ## Usage
 
