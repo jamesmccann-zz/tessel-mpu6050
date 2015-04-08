@@ -171,7 +171,7 @@ Mpu6050.prototype.readPitchAndRoll = (function() {
 
   return function(delayMs, callback) {
     this.readMotionData(function(ax, ay, az, gx, gy) {
-      var accel = this.convertAccelerometerData(ax, ay, az);
+      var accel = this.getAccelPitchAndRoll(ax, ay, az);
 
       var gyroRoll = roll + gx * delayMs / 1000;
       var gyroPitch = pitch + gy * delayMs / 1000;
