@@ -62,7 +62,7 @@ Mpu6050.prototype.init = function() {
 
   // Disable gyro self test
   // Set gyro full scale range to +-250 degrees/sec
-  this.setGyroscopeRange(250);
+  this.setGyroRange(250);
 
   // Disable accelerometer self test
   // Set the accelerometer full scale range to +- 2g
