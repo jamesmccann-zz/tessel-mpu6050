@@ -146,7 +146,7 @@ Mpu6050.prototype.readMotionData = function(callback) {
   });
 };
 
-Mpu6050.prototype.convertAccelerometerData = function(ax, ay, az) {
+Mpu6050.prototype.getAccelPitchAndRoll = function(ax, ay, az) {
   var roll = 57.295 * Math.atan(ay / Math.sqrt(Math.pow(az, 2) + Math.pow(ax, 2)));
   var pitch = 57.295 * Math.atan(-1*ax / Math.sqrt(Math.pow(az, 2) + Math.pow(ay, 2)));
 
