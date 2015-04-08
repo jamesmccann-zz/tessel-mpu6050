@@ -130,6 +130,19 @@ Mpu6050.prototype.readGyroData = function(callback) {
   });
 };
 
+// Useful for calibrating gyro
+Mpu6050.prototype.readGyroRaw = function(callback) {
+  this._readRegisters(GYRO_XOUT_H, 6, function(err, rx) {
+    var gx = rx.readInt16BE(0);
+    var gy = rx.readInt16BE(2);
+    var gz = rx.readInt16BE(4);
+
+    if (callback) {
+      callback(gx, gy, gz);
+    }
+  });
+};
+
 Mpu6050.prototype.readMotionData = function(callback) {
   var self = this;
   this._readRegisters(ACCEL_XOUT_H, 14, function(err, rx) {
