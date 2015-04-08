@@ -2,13 +2,13 @@
 
 A Tessel-compatible driver the InvenSense MPU-6050 IMU.
 
-### Installation
+## Installation
 
 ```sh
 npm install tessel-mpu6050
 ```
 
-### Usage
+## Usage
 
 This driver has been designed to work similar to the official Tessel accelerometer module, see [accel-mma84](https://github.com/tessel/accel-mma84).
 
@@ -26,7 +26,7 @@ mpu6050.on('ready', function() {
 });
 ```
 
-### Available Methods
+## Available Methods
 
 **use(port, address)**  
 Convenience method to wrap the `Mpu6050` constructor function. `port` should be the port on the tessel that is being used. `address` is an optional parameter that sets the I2C address for the constructor function. The I2C address for the MPU-6050 is either `0x68` (default) or `0x69` if the AD0 pin is pulled high. `constants.I2C_ADDR` and `constants.I2C_ADDR_HIGH` can be used to determine which address to use. For example, to use two MPU-6050's on ports A and B:
@@ -77,9 +77,12 @@ mpu6050.**setGyroRange(range, callback(err))**
 Sets the full scale range of the gyroscope to the value of `range`. Throws an error if `range` is not one of the allowed ranges `[250, 500, 1000, 2000]`. The callback will be called with an error from The Tessel I2C library if any error occurred.
 
 mpu6050.**setGyroOffsets(x, y, z)**  
-Sets offsets for the gyroscope for each axis `x`, `y`, and `z`. This method can be used to set offsets for gyroscope readings, useful for gyroscope calibration.
+Sets offsets for the gyroscope for each axigs `x`, `y`, and `z`. This method can be used to set offsets for gyroscope readings, useful for gyroscope calibration.
 
 **constants**  
 An object of constants for reading and writing config values. Allows you to read/write registers that are not currently wrapped within the library using `_readRegisters` or `_writeRegisters` directly.
 
+## Contributions
+
+Any thoughts, comments, ideas, issues, or pull requests are welcome and appreciated.
 
