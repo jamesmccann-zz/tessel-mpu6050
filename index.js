@@ -49,6 +49,8 @@ function Mpu6050(port, i2cAddress) {
   this.i2c = new port.I2C(i2cAddress);
   this.queue = new Queue();
 
+  this.roll = 0;
+  this.pitch = 0;
   this.gyro_xoffset = 0;
   this.gyro_yoffset = 0;
   this.gyro_zoffset = 0;
@@ -183,25 +185,21 @@ Mpu6050.prototype.getAccelPitchAndRoll = function(ax, ay, az) {
   return { roll: roll, pitch: pitch };
 };
 
-Mpu6050.prototype.readPitchAndRoll = (function() {
-  var pitch = 0.0, roll = 0.0;
+Mpu6050.prototype.readPitchAndRoll = function(delayMs, callback) {
+  this.readMotionData(function(ax, ay, az, gx, gy) {
+    var accel = this.getAccelPitchAndRoll(ax, ay, az);
 
-  return function(delayMs, callback) {
-    this.readMotionData(function(ax, ay, az, gx, gy) {
-      var accel = this.getAccelPitchAndRoll(ax, ay, az);
+    var gyroRoll = this.roll + gx * delayMs / 1000;
+    var gyroPitch = this.pitch + gy * delayMs / 1000;
 
-      var gyroRoll = roll + gx * delayMs / 1000;
-      var gyroPitch = pitch + gy * delayMs / 1000;
+    this.roll = (0.90 * gyroRoll + 0.10 * accel.roll) || 0;
+    this.pitch = (0.90 * gyroPitch + 0.10 * accel.pitch) || 0;
 
-      roll = (0.90 * gyroRoll + 0.1 * accel.roll) || 0;
-      pitch = (0.90 * gyroPitch + 0.1 * accel.pitch) || 0;
-
-      if (callback) {
-        callback(pitch, roll);
-      }
-    }.bind(this));
-  };
-}());
+    if (callback) {
+      callback(this.pitch, this.roll);
+    }
+  }.bind(this));
+};
 
 Mpu6050.prototype.setSleepModeEnabled = function(enabled) {
   this._writeRegister(PWR_MGMT_1, enabled | 0);

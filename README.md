@@ -42,7 +42,7 @@ mpu6050.**_readRegisters(addressToRead, bytesToRead, callback(err, rx))**
 Reads a number of bytes from the device at the supplied address over I2C. The callback function will be called when the read is complete with an error from the Tessel's I2C library, or a `Buffer` containing the bytes that were read.
 
 mpu6050.**_writeRegisters(addressToWrite, dataToWrite, callback(err)**  
-Writes a single bye of data to the device at the supplied address over I2C. The callback function will be called when the write is complete with an error from the Tessel's I2C library if the write was not successful.
+Writes a single byte of data to the device at the supplied address over I2C. The callback function will be called when the write is complete with an error from the Tessel's I2C library if the write was not successful.
 
 mpu6050.**readAccelerometerData(callback(ax, ay, az))**  
 Reads the current acceleration measured by the device's accelerometer on x, y, and z axes. Values supplied to the callback function are measured in *g*.
@@ -60,7 +60,7 @@ mpu6050.**readMotionData(callback(ax, ay, az, gx, gy, gz))**
 Reads acceleration and rotation measurements from the device's accelerometer and gyroscope simultaneously. Values returned are the same as would otherwise be read individually through `readAccelerometerData` and `readGyroData`.
 
 mpu6050.**getAccelPitchAndRoll(ax, ay, az)**  
-Convers the 3-axis acceleration vectors into pitch and roll measurements. Output as an object { pitch, roll }. Output values are measured in degrees.
+Converts the 3-axis acceleration vectors into pitch and roll measurements. Output as an object containing { pitch, roll }. Output values are measured in degrees.
 
 mpu6050.**readPitchAndRoll(delayMs, callback(pitch, roll))**  
 Reads acceleration and rotation measurements from the device and calculates combined pitch and roll values using a complementary filter. The `delayMs` arguments tells the module how frequently reads will be taken and therefore how many milliseconds have elapsed since the last reading - this is required for integration of gyroscope output to produce pitch and roll measurements. Values supplied to the callback are measured in degrees.
