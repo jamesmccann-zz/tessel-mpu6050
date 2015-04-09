@@ -1,6 +1,6 @@
 # tessel-mpu6050
 
-A Tessel-compatible driver the InvenSense MPU-6050 IMU.
+A Tessel-compatible driver for the InvenSense MPU-6050 IMU.
 
 ## Installation
 
