@@ -1,3 +1,13 @@
+/**
+ * Tessel compatible driver for the Invensense MPU-6050 IMU.
+ *
+ * A register map and description of the I2C protocol for the MPU-6050
+ * can be found here: http://invensense.com/mems/gyro/documents/RM-MPU-6000A.pdf
+ *
+ * Copyright 2015 James McCann
+ * Licensed under the MIT Lincense.
+ * See LICENSE file or http://opensource.org/licenses/MIT.
+ */
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var Queue = require('sync-queue');
@@ -130,7 +140,10 @@ Mpu6050.prototype.readGyroData = function(callback) {
   });
 };
 
-// Useful for calibrating gyro
+/**
+ * Provides the raw gyro readings straight from the device.
+ * Useful for calibrating the gyroscope
+ */
 Mpu6050.prototype.readGyroRaw = function(callback) {
   this._readRegisters(GYRO_XOUT_H, 6, function(err, rx) {
     var gx = rx.readInt16BE(0);
@@ -159,6 +172,10 @@ Mpu6050.prototype.readMotionData = function(callback) {
   });
 };
 
+/**
+ * Calculate the pitch and roll using measured accel gravity vectors.
+ * See http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf for more info
+ */
 Mpu6050.prototype.getAccelPitchAndRoll = function(ax, ay, az) {
   var roll = 57.295 * Math.atan(ay / Math.sqrt(Math.pow(az, 2) + Math.pow(ax, 2)));
   var pitch = 57.295 * Math.atan(-1*ax / Math.sqrt(Math.pow(az, 2) + Math.pow(ay, 2)));
