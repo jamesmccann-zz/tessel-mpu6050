@@ -75,10 +75,16 @@ mpu6050.**setGyroRange(range, callback(err))**
 Sets the full scale range of the gyroscope to the value of `range`. Throws an error if `range` is not one of the allowed ranges `[250, 500, 1000, 2000]`. The callback will be called with an error from The Tessel I2C library if any error occurred.
 
 mpu6050.**setGyroOffsets(x, y, z)**  
-Sets offsets for the gyroscope for each axigs `x`, `y`, and `z`. This method can be used to set offsets for gyroscope readings, useful for gyroscope calibration.
+Sets offsets for the gyroscope for each of the `x`, `y`, and `z` axes. This method can be used to set offsets for gyroscope readings, useful for gyroscope calibration.
 
 **constants**  
 An object of constants for reading and writing config values. Allows you to read/write registers that are not currently wrapped within the library using `_readRegisters` or `_writeRegisters` directly.
+
+The convenience methods here do not model the complete
+functionality of the MPU-6050 and there are advanced configurations that
+aren't possible with the methods provided by this module alone. For any
+advanced configuration, I recommend using `_readRegisters` and
+`writeRegisters` directly, as required by your use case.
 
 ## Contributions
 
