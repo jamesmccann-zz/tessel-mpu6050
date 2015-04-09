@@ -90,3 +90,7 @@ advanced configuration, I recommend using `_readRegisters` and
 
 Any thoughts, comments, ideas, issues, or pull requests are welcome and appreciated.
 
+## License
+
+MIT
+
