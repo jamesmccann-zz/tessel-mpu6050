@@ -1,7 +1,7 @@
 {
   "name": "tessel-mpu6050",
   "version": "0.0.1",
-  "description": "A tessel module for interfacing with the InvenSense MPU6050 over I2C",
+  "description": "A Tessel compatible driver for the InvenSense MPU-6050",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
