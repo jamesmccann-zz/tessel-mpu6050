@@ -4,14 +4,15 @@ A Tessel-compatible driver for the InvenSense MPU-6050 IMU.
 
 ## Installation
 
-Work in progress
+```sh
+npm install tessel-mpu6050
+```
 
 ## Usage
 
 This driver has been designed to work similar to the official Tessel accelerometer module, see [accel-mma84](https://github.com/tessel/accel-mma84).
 
 ```js
-
 var tessel = require('tessel');
 var mpu6050 = require('tessel-mpu6050').use(tessel.port['A']);
 
