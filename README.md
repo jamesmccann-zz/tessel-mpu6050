@@ -32,7 +32,7 @@ You can use the MPU-6050 over any of the four Tessel module ports labelled A
 through D by connecting the pins for GND, 3.3V, SDA, and SCL. The wiring
 diagram below shows how this works with the GY-521 breakout board.
 
-![GY-521 Wiring Diagram](extras/wiring_diagram.png)
+![GY-521 Wiring Diagram](extras/wiring-diagram.png)
 
 The dashed line in the diagram shows how the AD0 pin can optionally be
 pulled high, this changes the I2C address of the chip to 0x69 (usually
