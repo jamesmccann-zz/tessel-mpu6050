@@ -54,6 +54,9 @@ function Mpu6050(port, i2cAddress) {
   this.gyro_xoffset = 0;
   this.gyro_yoffset = 0;
   this.gyro_zoffset = 0;
+  this.accel_xoffset = 0;
+  this.accel_yoffset = 0;
+  this.accel_zoffset = 0;
 
   this.init();
 }
@@ -108,12 +111,24 @@ Mpu6050.prototype._writeRegister = function (addressToWrite, dataToWrite, callba
 Mpu6050.prototype.readAccelerometerData = function(callback) {
   var self = this;
   this._readRegisters(ACCEL_XOUT_H, 6, function(err, rx) {
-    var ax = rx.readInt16BE(0) / self.accel_sensitivity;
-    var ay = rx.readInt16BE(2) / self.accel_sensitivity;
-    var az = rx.readInt16BE(4) / self.accel_sensitivity;
+    var ax = (rx.readInt16BE(0) - self.accel_xoffset) / self.accel_sensitivity;
+    var ay = (rx.readInt16BE(2) - self.accel_yoffset) / self.accel_sensitivity;
+    var az = (rx.readInt16BE(4) - self.accel_zoffset) / self.accel_sensitivity;
 
     if (callback) {
       callback(ax, ay, az);
+    }
+  });
+};
+
+Mpu6050.prototype.readAccelRaw = function(callback) {
+ this._readRegisters(ACCEL_XOUT_H, 6, function(err, rx) {
+    var gx = rx.readInt16BE(0);
+    var gy = rx.readInt16BE(2);
+    var gz = rx.readInt16BE(4);
+
+    if (callback) {
+      callback(gx, gy, gz);
     }
   });
 };
@@ -161,9 +176,9 @@ Mpu6050.prototype.readGyroRaw = function(callback) {
 Mpu6050.prototype.readMotionData = function(callback) {
   var self = this;
   this._readRegisters(ACCEL_XOUT_H, 14, function(err, rx) {
-    var ax = rx.readInt16BE(0) / self.accel_sensitivity;
-    var ay = rx.readInt16BE(2) / self.accel_sensitivity;
-    var az = rx.readInt16BE(4) / self.accel_sensitivity;
+    var ax = (rx.readInt16BE(0) - self.accel_xoffset) / self.accel_sensitivity;
+    var ay = (rx.readInt16BE(2) - self.accel_yoffset) / self.accel_sensitivity;
+    var az = (rx.readInt16BE(4) - self.accel_zoffset) / self.accel_sensitivity;
     var gx = (rx.readInt16BE(8) - self.gyro_xoffset) / self.gyro_xsensitivity;
     var gy = (rx.readInt16BE(10) - self.gyro_yoffset) / self.gyro_ysensitivity;
     var gz = (rx.readInt16BE(12) - self.gyro_zoffset) / self.gyro_zsensitivity;
@@ -232,6 +247,12 @@ Mpu6050.prototype.setGyroOffsets = function(x, y, z) {
   this.gyro_xoffset = x;
   this.gyro_yoffset = y;
   this.gyro_zoffset = z;
+};
+
+Mpu6050.prototype.setAccelOffsets = function(x, y, z) {
+  this.accel_xoffset = x;
+  this.accel_yoffset = y;
+  this.accel_zoffset = z;
 };
 
 function use(port, address) {
