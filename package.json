@@ -1,6 +1,6 @@
 {
   "name": "tessel-mpu6050",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A Tessel compatible driver for the InvenSense MPU-6050",
   "main": "index.js",
   "scripts": {
