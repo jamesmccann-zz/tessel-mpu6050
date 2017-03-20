@@ -1,0 +1,88 @@
+{
+  "name": "jamesmccann/tessel-mpu6050",
+  "version": "0.1.4",
+  "libraries": {
+    "xv": "^1.1.25"
+  },
+  "title": "tessel-mpu6050",
+  "branch": "master",
+  "style": {
+    "name": "Swiss",
+    "componentSet": {
+      "nav": "nav/BasicNav",
+      "header": "header/SwissHeader",
+      "article": "article/SwissArticle",
+      "footer": "footer/BasicFooter"
+    },
+    "fontFamily": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+    "heading": {
+      "fontWeight": 700,
+      "letterSpacing": "-0.01em"
+    },
+    "layout": {
+      "fluid": true
+    },
+    "colors": {
+      "text": "#000",
+      "background": "#fff",
+      "primary": "#05a",
+      "secondary": "#444",
+      "highlight": "#f30",
+      "border": "#ccc",
+      "muted": "#eee"
+    }
+  },
+  "content": [
+    {
+      "component": "nav",
+      "links": [
+        {
+          "href": "https://github.com/jamesmccann/tessel-mpu6050",
+          "text": "GitHub"
+        },
+        {
+          "href": "https://npmjs.com/package/tessel-mpu6050",
+          "text": "npm"
+        }
+      ]
+    },
+    {
+      "component": "header",
+      "heading": "tessel-mpu6050",
+      "subhead": "A Tessel-compatible driver for the InvenSense MPU-6050 Accelerometer/Gyroscope",
+      "children": [
+        {
+          "component": "ui/TweetButton",
+          "text": "tessel-mpu6050: A Tessel-compatible driver for the InvenSense MPU-6050 Accelerometer/Gyroscope",
+          "url": ""
+        },
+        {
+          "component": "ui/GithubButton",
+          "user": "jamesmccann",
+          "repo": "tessel-mpu6050"
+        }
+      ],
+      "text": "v0.0.3"
+    },
+    {
+      "component": "article",
+      "metadata": {
+        "source": "github.readme"
+      },
+      "html": "\n<p>A Tessel-compatible driver for the InvenSense MPU-6050 IMU.</p>\n<h2>Installation</h2>\n<pre>npm install tessel-mpu6050</pre><h2>Usage</h2>\n<p>This driver has been designed to work similar to the official Tessel accelerometer module, see <a href=\"https://github.com/tessel/accel-mma84\">accel-mma84</a>.</p>\n<pre><span class=\"hljs-keyword\">var</span> tessel = <span class=\"hljs-built_in\">require</span>(<span class=\"hljs-string\">&apos;tessel&apos;</span>);\n<span class=\"hljs-keyword\">var</span> mpu6050 = <span class=\"hljs-built_in\">require</span>(<span class=\"hljs-string\">&apos;tessel-mpu6050&apos;</span>).use(tessel.port[<span class=\"hljs-string\">&apos;A&apos;</span>]);\n\nmpu6050.on(<span class=\"hljs-string\">&apos;ready&apos;</span>, <span class=\"hljs-function\"><span class=\"hljs-keyword\">function</span>(<span class=\"hljs-params\"></span>) </span>{\n  setInterval(<span class=\"hljs-function\"><span class=\"hljs-keyword\">function</span>(<span class=\"hljs-params\"></span>) </span>{\n    mpu6050.getPitchAndRoll(<span class=\"hljs-number\">100</span>, <span class=\"hljs-function\"><span class=\"hljs-keyword\">function</span>(<span class=\"hljs-params\">pitch, roll</span>) </span>{\n      <span class=\"hljs-built_in\">console</span>.log(<span class=\"hljs-string\">&apos;pitch:&apos;</span>, pitch, <span class=\"hljs-string\">&apos;roll:&apos;</span>, roll);\n    });\n  }, <span class=\"hljs-number\">100</span>);\n});</pre><h3>Hardware setup</h3>\n<p>This driver is designed to communicate with the MPU-6050 over I2C.\nYou can use the MPU-6050 over any of the four Tessel module ports labelled A\nthrough D by connecting the pins for GND, 3.3V, SDA, and SCL. The wiring\ndiagram below shows how this works with the GY-521 breakout board.</p>\n<p><img src=\"extras/wiring-diagram.png\"></p>\n<p>The dashed line in the diagram shows how the AD0 pin can optionally be\npulled high, this changes the I2C address of the chip to 0x69 (usually\n0x68), which is handy if you want to connect two boards to the same\nI2C bus.</p>\n<h2>Available Methods</h2>\n<p><strong>use(port, address)</strong><br>Convenience method to wrap the <code>Mpu6050</code> constructor function. <code>port</code> should be the port on the tessel that is being used. <code>address</code> is an optional parameter that sets the I2C address for the constructor function. The I2C address for the MPU-6050 is either <code>0x68</code> (default) or <code>0x69</code> if the AD0 pin is pulled high. <code>constants.I2C_ADDR</code> and <code>constants.I2C_ADDR_HIGH</code> can be used to determine which address to use. For example, to use two MPU-6050&apos;s on ports A and B:</p>\n<pre><span class=\"hljs-keyword\">var</span> Mpu6050 = <span class=\"hljs-built_in\">require</span>(<span class=\"hljs-string\">&apos;tessel-mpu6050&apos;</span>);\n<span class=\"hljs-keyword\">var</span> mpu6050 = Mpu6050.use(tessel.port[<span class=\"hljs-string\">&apos;A&apos;</span>]);                                   <span class=\"hljs-comment\">// Uses 0x68</span>\n<span class=\"hljs-keyword\">var</span> mpu6050b = Mpu6050.use(tessel.port[<span class=\"hljs-string\">&apos;B&apos;</span>], Mpu6050.constants.I2C_ADDR_HIGH); <span class=\"hljs-comment\">// Uses 0x69</span></pre><p>mpu6050.<strong>init()</strong><br>Initialises the module with defaults for sample rate, DLPF, &#xB1;250&#xB0;/s full scale gyroscope range, and &#xB1;2g full scale accelerometer range.</p>\n<p>mpu6050.<strong>_readRegisters(addressToRead, bytesToRead, callback(err, rx))</strong><br>Reads a number of bytes from the device at the supplied address over I2C. The callback function will be called when the read is complete with an error from the Tessel&apos;s I2C library, or a <code>Buffer</code> containing the bytes that were read.</p>\n<p>mpu6050.<strong>_writeRegisters(addressToWrite, dataToWrite, callback(err)</strong><br>Writes a single byte of data to the device at the supplied address over I2C. The callback function will be called when the write is complete with an error from the Tessel&apos;s I2C library if the write was not successful.</p>\n<p>mpu6050.<strong>readAccelerometerData(callback(ax, ay, az))</strong><br>Reads the current acceleration measured by the device&apos;s accelerometer on x, y, and z axes. Values supplied to the callback function are measured in <em>g</em>.</p>\n<p>mpu6050.<strong>readTempData(callback(temp))</strong><br>Reads the current temperature from the device. Temperature value supplied to the callback function measured in Celsius (&#xB0;C).</p>\n<p>mpu6050.<strong>readGyroData(callback(gx, gy, gz))</strong><br>Reads the current rotational velocity measured by the device&apos;s gyroscope. Raw gyroscope values have gyro offsets removed and are scaled before being returned. Values supplied to the callback are measured in degrees per second (&#xB0;/s).</p>\n<p>mpu6050.<strong>readGyroRaw(callback(gx, gy, gz))</strong><br>Provides raw readings directly from the gyroscope with no conversions applied. Useful for calibrating device.</p>\n<p>mpu6050.<strong>readMotionData(callback(ax, ay, az, gx, gy, gz))</strong><br>Reads acceleration and rotation measurements from the device&apos;s accelerometer and gyroscope simultaneously. Values returned are the same as would otherwise be read individually through <code>readAccelerometerData</code> and <code>readGyroData</code>.</p>\n<p>mpu6050.<strong>getAccelPitchAndRoll(ax, ay, az)</strong><br>Converts the 3-axis acceleration vectors into pitch and roll measurements. Output as an object containing { pitch, roll }. Output values are measured in degrees.</p>\n<p>mpu6050.<strong>readPitchAndRoll(delayMs, callback(pitch, roll))</strong><br>Reads acceleration and rotation measurements from the device and calculates combined pitch and roll values using a complementary filter. The <code>delayMs</code> arguments tells the module how frequently reads will be taken and therefore how many milliseconds have elapsed since the last reading - this is required for integration of gyroscope output to produce pitch and roll measurements. Values supplied to the callback are measured in degrees.</p>\n<p>mpu6050.<strong>setSleepModeEnabled(enabled)</strong><br>Sets the sleep mode of the device to the value of <code>enabled</code>.</p>\n<p>mpu6050.<strong>setAccelerometerRange(range, callback(err))</strong><br>Sets the full scale range of the accelerometer to the value of <code>range</code>. Throws an error if <code>range</code> is not one of the allowed ranges <code>[2, 4, 8, 16]</code>. The callback will be called with an error from the Tessel I2C library if any error occurred.</p>\n<p>mpu6050.<strong>setGyroRange(range, callback(err))</strong><br>Sets the full scale range of the gyroscope to the value of <code>range</code>. Throws an error if <code>range</code> is not one of the allowed ranges <code>[250, 500, 1000, 2000]</code>. The callback will be called with an error from The Tessel I2C library if any error occurred.</p>\n<p>mpu6050.<strong>setGyroOffsets(x, y, z)</strong><br>Sets offsets for the gyroscope for each of the <code>x</code>, <code>y</code>, and <code>z</code> axes. This method can be used to set offsets for gyroscope readings, useful for gyroscope calibration.</p>\n<p><strong>constants</strong><br>An object of constants for reading and writing config values. Allows you to read/write registers that are not currently wrapped within the library using <code>_readRegisters</code> or <code>_writeRegisters</code> directly.</p>\n<p>The convenience methods here do not model the complete\nfunctionality of the MPU-6050 and there are advanced configurations that\naren&apos;t possible with the methods provided by this module alone. For any\nadvanced configuration, I recommend using <code>_readRegisters</code> and\n<code>writeRegisters</code> directly, as required by your use case.</p>\n<h2>Contributions</h2>\n<p>Any thoughts, comments, ideas, issues, or pull requests are welcome and appreciated.</p>\n<h2>License</h2>\n<p>MIT</p>\n"
+    },
+    {
+      "component": "footer",
+      "links": [
+        {
+          "href": "https://github.com/jamesmccann/tessel-mpu6050",
+          "text": "GitHub"
+        },
+        {
+          "href": "https://github.com/jamesmccann",
+          "text": "jamesmccann"
+        }
+      ]
+    }
+  ]
+}
